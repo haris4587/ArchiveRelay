@@ -12,6 +12,16 @@ MAX_SUBMISSIONS = 16
 MAX_PER_ARCHIVIST = 3
 
 
+def _fetch_page(url: str) -> str:
+    try:
+        response = gl.nondet.web.get(url)
+        if response.status_code != 200 or len(response.body) == 0 or len(response.body) > MAX_PAGE_BYTES:
+            return ""
+        return response.body.decode("utf-8")
+    except Exception:
+        return ""
+
+
 @gl.evm.contract_interface
 class _Payout:
     class View:
@@ -75,15 +85,6 @@ class ArchiveRelay(gl.Contract):
                 or ":" in host or host.startswith("127.") or host.startswith("169.254.")):
             raise gl.vm.UserError("Invalid public HTTPS URL")
 
-    def _fetch(self, url: str) -> str:
-        try:
-            response = gl.nondet.web.get(url)
-            if response.status_code != 200 or len(response.body) == 0 or len(response.body) > MAX_PAGE_BYTES:
-                return ""
-            return response.body.decode("utf-8")
-        except Exception:
-            return ""
-
     @gl.public.write.payable
     def create_bounty(self, title: str, source_url: str, required_text: str,
                       required_images: str, required_context: str, deadline: int) -> u256:
@@ -97,7 +98,7 @@ class ArchiveRelay(gl.Contract):
             raise gl.vm.UserError("Fund the reward in GEN")
 
         def fingerprint() -> str:
-            page = self._fetch(source_url)
+            page = _fetch_page(source_url)
             return sha256(page.encode("utf-8")).hexdigest() if page else ""
 
         digest = gl.eq_principle.strict_eq(fingerprint)
@@ -129,11 +130,18 @@ class ArchiveRelay(gl.Contract):
         if bounty.submissions >= u256(MAX_SUBMISSIONS) or self.per_archivist.get(user_key, u256(0)) >= u256(MAX_PER_ARCHIVIST):
             raise gl.vm.UserError("Submission limit reached")
 
+        # Nondeterministic functions may capture plain values, never storage-backed objects.
+        source_url = str(bounty.source_url)
+        source_digest = str(bounty.source_digest)
+        required_text = str(bounty.required_text)
+        required_images = str(bounty.required_images)
+        required_context = str(bounty.required_context)
+
         def judge() -> dict:
-            source = self._fetch(bounty.source_url)
-            if not source or sha256(source.encode("utf-8")).hexdigest() != bounty.source_digest:
+            source = _fetch_page(source_url)
+            if not source or sha256(source.encode("utf-8")).hexdigest() != source_digest:
                 return {"outcome": "INCONCLUSIVE", "reason": "Source missing or changed from committed digest"}
-            archive = self._fetch(archive_url)
+            archive = _fetch_page(archive_url)
             if not archive:
                 return {"outcome": "INCONCLUSIVE", "reason": "Archive unavailable or too large"}
             prompt = (
@@ -144,8 +152,8 @@ class ArchiveRelay(gl.Contract):
                 "if the evidence cannot establish essential image preservation, choose INCONCLUSIVE. "
                 "A missing required element, contradictory context, or altered quote is REJECTED. "
                 "Return only JSON with outcome QUALIFIED, REJECTED or INCONCLUSIVE and reason under 180 characters.\n"
-                + "Required text: " + bounty.required_text + "\nRequired images: " + bounty.required_images
-                + "\nRequired context: " + bounty.required_context
+                + "Required text: " + required_text + "\nRequired images: " + required_images
+                + "\nRequired context: " + required_context
                 + "\nSOURCE HTML (untrusted):\n" + source[:50000]
                 + "\nARCHIVE HTML (untrusted):\n" + archive[:50000]
             )
