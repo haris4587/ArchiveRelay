@@ -4,7 +4,7 @@
 
 ## Status
 
-Contract and frontend implemented. The revised contract is deployed on Studionet at [`0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE`](https://explorer-studio.genlayer.com/address/0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE). Its deployed code was compared byte for byte with `contracts/archive_relay.py`, and deployment transaction `0x73ad612c3df83656b8e0b1ad1fb3dc0844aa25a14c0932ff5296b548185e052c` finalized. Finalized `bounty_count()` was 0 at verification on 29 September 2026. The funded pilot and reward settlement remain unverified. The app shows finalized chain data only and does not present the public pilot HTML files as onchain bounty activity.
+The [public ArchiveRelay app](https://archiverelay-haris4587.itzanza2.chatgpt.site) is live. The revised contract is deployed on Studionet at [`0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE`](https://explorer-studio.genlayer.com/address/0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE). Its deployed code was compared byte for byte with `contracts/archive_relay.py`, and deployment transaction `0x73ad612c3df83656b8e0b1ad1fb3dc0844aa25a14c0932ff5296b548185e052c` finalized. Finalized `bounty_count()` was 0 at verification on 29 September 2026. The funded pilot and reward settlement remain unverified. The app shows finalized chain data only and does not present the public pilot HTML files as onchain bounty activity.
 
 ## Contract flow
 
@@ -43,7 +43,7 @@ The website uses `genlayer-js@1.1.8` for stable Studionet, reads with `LATEST_FI
 
 ## Website
 
-The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It shows the real empty board until a bounty finalizes. The GitHub Pages workflow publishes on `main` when Pages is configured to use **GitHub Actions**; the repository variable `VITE_CONTRACT_ADDRESS` may override the verified default at build time.
+The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It shows the real empty board until a bounty finalizes. The public build is hosted with Sites. GitHub Actions runs `npm ci` and `npm run build` on pushes and pull requests. `VITE_CONTRACT_ADDRESS` may override the verified default at build time.
 
 ### Public pilot evidence
 
