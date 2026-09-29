@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.7.0",
-    "genlayer-js": "^2.0.0-rc.1",
+    "genlayer-js": "^1.1.8",
     "lucide-react": "^0.468.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
