@@ -4,7 +4,7 @@
 
 ## Status
 
-The [public ArchiveRelay app](https://archiverelay-haris4587.itzanza2.chatgpt.site) is live. The revised contract is deployed on Studionet at [`0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE`](https://explorer-studio.genlayer.com/address/0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE). Its deployed code was compared byte for byte with `contracts/archive_relay.py`, and deployment transaction `0x73ad612c3df83656b8e0b1ad1fb3dc0844aa25a14c0932ff5296b548185e052c` finalized. Finalized `bounty_count()` was 0 at verification on 29 September 2026. The funded pilot and reward settlement remain unverified. The app shows finalized chain data only and does not present the public pilot HTML files as onchain bounty activity.
+The [public ArchiveRelay app](https://archiverelay-haris4587.itzanza2.chatgpt.site) currently points to the earlier Studionet contract at [`0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE`](https://explorer-studio.genlayer.com/address/0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE). **That deployed revision has a broken web-response field (`status_code` instead of `status`) and cannot create a bounty from a valid source.** The corrected source in this repository has not yet been deployed or exercised on Studionet. The direct-mode tests mock web/LLM responses and capture the emitted transfer; they do not prove an onchain payout. The app displays only finalized chain data and no fabricated bounties.
 
 ## Contract flow
 
@@ -26,9 +26,9 @@ npm ci
 cp .env.example .env.local
 npm run dev
 npm run build
-python -m pip install genlayer-test genvm-linter
+python -m pip install -r requirements-dev.txt
 genvm-lint contracts/archive_relay.py
-pytest tests -q
+python -m pytest tests -q
 ```
 
 The website uses `genlayer-js@1.1.8` for stable Studionet, reads with `LATEST_FINAL`, waits for finalization on wallet-backed writes, and checks the execution result. Wallet writes require an EIP-1193 provider connected to Studionet. The website does not ask for a private key. The Studio built-in account can deploy and exercise the contract inside Studio without connecting a browser wallet to the website. The SDK 2.0 release candidate was incompatible with the stable Studio RPC when tested here.
@@ -36,14 +36,14 @@ The website uses `genlayer-js@1.1.8` for stable Studionet, reads with `LATEST_FI
 ## Deploy and verify in Studio
 
 1. Open [GenLayer Studio](https://studio.genlayer.com), select **Studionet** and a funded built-in account (faucet in the account selector).
-2. The revision is already deployed at the address above. To deploy another instance, load `contracts/archive_relay.py` with no constructor arguments and wait for a successful finalized result.
+2. Load the corrected `contracts/archive_relay.py` and deploy a new instance with no constructor arguments. The earlier address above is not the corrected revision.
 3. From the contract write panel, create a small funded bounty against a stable, public HTML page. Set the payable value separately from transaction fees. Confirm the source digest and reward through `get_bounty(0)` after finalization.
 4. Submit a genuine public archive URL; inspect its recorded outcome with `get_attempt(0)` and the final state. Try a changed/unavailable URL for inconclusive behavior. For payout and refund paths, use distinct bounties and inspect emitted transfer settlement.
-5. The verified revision address is the app default. Set `VITE_CONTRACT_ADDRESS` to use a later verified instance and rebuild. Do not substitute the earlier `0x7e99e2D8CfFFDF3A38EB4E6F0247bEeF457f6a6C` instance: it predates the storage capture fix.
+5. Set `VITE_CONTRACT_ADDRESS` to the new verified instance and rebuild the website. Neither the current app default nor the earlier `0x7e99e2D8CfFFDF3A38EB4E6F0247bEeF457f6a6C` instance is suitable for a live bounty run.
 
 ## Website
 
-The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It shows the real empty board until a bounty finalizes. The public build is hosted with Sites. GitHub Actions runs `npm ci` and `npm run build` on pushes and pull requests. `VITE_CONTRACT_ADDRESS` may override the verified default at build time.
+The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It shows the real empty board until a bounty finalizes. The public build is hosted with Sites. GitHub Actions checks the frontend build and the direct-mode Python contract tests on pushes and pull requests. `VITE_CONTRACT_ADDRESS` must be set to the corrected deployment before a live bounty run.
 
 ### Public pilot evidence
 

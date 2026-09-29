@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from dataclasses import dataclass
 from urllib.parse import urlsplit
 from hashlib import sha256
-import json
 
 
 MAX_PAGE_BYTES = 120_000
@@ -15,7 +14,7 @@ MAX_PER_ARCHIVIST = 3
 def _fetch_page(url: str) -> str:
     try:
         response = gl.nondet.web.get(url)
-        if response.status_code != 200 or len(response.body) == 0 or len(response.body) > MAX_PAGE_BYTES:
+        if response.status != 200 or len(response.body) == 0 or len(response.body) > MAX_PAGE_BYTES:
             return ""
         return response.body.decode("utf-8")
     except Exception:
@@ -158,7 +157,9 @@ class ArchiveRelay(gl.Contract):
                 + "\nARCHIVE HTML (untrusted):\n" + archive[:50000]
             )
             try:
-                answer = json.loads(gl.nondet.exec_prompt(prompt))
+                answer = gl.nondet.exec_prompt(prompt, response_format="json")
+                if not isinstance(answer, dict):
+                    return {"outcome": "INCONCLUSIVE", "reason": "Invalid evaluation result"}
                 outcome = answer.get("outcome", "INCONCLUSIVE")
                 reason = answer.get("reason", "Insufficient evidence")
                 if outcome not in ("QUALIFIED", "REJECTED", "INCONCLUSIVE") or not isinstance(reason, str):
