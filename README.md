@@ -4,7 +4,7 @@
 
 ## Status
 
-The [public ArchiveRelay app](https://archiverelay-haris4587.itzanza2.chatgpt.site) currently points to the earlier Studionet contract at [`0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE`](https://explorer-studio.genlayer.com/address/0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE). **That deployed revision has a broken web-response field (`status_code` instead of `status`) and cannot create a bounty from a valid source.** The corrected source in this repository has not yet been deployed or exercised on Studionet. The direct-mode tests mock web/LLM responses and capture the emitted transfer; they do not prove an onchain payout. The app displays only finalized chain data and no fabricated bounties.
+The [public ArchiveRelay app](https://archiverelay-haris4587.itzanza2.chatgpt.site) is being updated to the corrected Studionet contract at [`0x3C9085A948D556D9172365b059eFdee9ea4202ab`](https://explorer-studio.genlayer.com/address/0x3C9085A948D556D9172365b059eFdee9ea4202ab). Deployment transaction `0xe679f0e6e69ee1b71ebe344a9712e8c6e0616eb8c7113cb3d797d949f44d1c23` finalized. Finalized `bounty_count()` and `attempt_count()` both return 0 on the new instance. The previous [`0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE`](https://explorer-studio.genlayer.com/address/0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE) revision has a broken web-response field (`status_code` instead of `status`); use the new address. Direct-mode tests mock web/LLM responses and capture the emitted transfer; they do not prove an onchain payout. The app displays only finalized chain data and no fabricated bounties.
 
 ## Contract flow
 
@@ -36,14 +36,14 @@ The website uses `genlayer-js@1.1.8` for stable Studionet, reads with `LATEST_FI
 ## Deploy and verify in Studio
 
 1. Open [GenLayer Studio](https://studio.genlayer.com), select **Studionet** and a funded built-in account (faucet in the account selector).
-2. Load the corrected `contracts/archive_relay.py` and deploy a new instance with no constructor arguments. The earlier address above is not the corrected revision.
+2. The corrected `contracts/archive_relay.py` is deployed at the address above. To deploy another instance, load that file with no constructor arguments and wait for a finalized result.
 3. From the contract write panel, create a small funded bounty against a stable, public HTML page. Set the payable value separately from transaction fees. Confirm the source digest and reward through `get_bounty(0)` after finalization.
 4. Submit a genuine public archive URL; inspect its recorded outcome with `get_attempt(0)` and the final state. Try a changed/unavailable URL for inconclusive behavior. For payout and refund paths, use distinct bounties and inspect emitted transfer settlement.
-5. Set `VITE_CONTRACT_ADDRESS` to the new verified instance and rebuild the website. Neither the current app default nor the earlier `0x7e99e2D8CfFFDF3A38EB4E6F0247bEeF457f6a6C` instance is suitable for a live bounty run.
+5. The app default is the corrected contract address above. Set `VITE_CONTRACT_ADDRESS` to use a later verified instance and rebuild. Do not use the older `0x1E33...` or `0x7e99...` instances for a live bounty run.
 
 ## Website
 
-The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It shows the real empty board until a bounty finalizes. The public build is hosted with Sites. GitHub Actions checks the frontend build and the direct-mode Python contract tests on pushes and pull requests. `VITE_CONTRACT_ADDRESS` must be set to the corrected deployment before a live bounty run.
+The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It shows the real empty board until a bounty finalizes. The public build is hosted with Sites. GitHub Actions checks the frontend build and the direct-mode Python contract tests on pushes and pull requests. `VITE_CONTRACT_ADDRESS` can override the corrected default.
 
 ### Public pilot evidence
 

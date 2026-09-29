@@ -2,7 +2,7 @@ import { createClient } from 'genlayer-js';
 import { studionet } from 'genlayer-js/chains';
 import { ExecutionResult, TransactionHashVariant, TransactionStatus } from 'genlayer-js/types';
 
-export const CONTRACT = (import.meta.env.VITE_CONTRACT_ADDRESS || '0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE').trim() as `0x${string}`;
+export const CONTRACT = (import.meta.env.VITE_CONTRACT_ADDRESS || '0x3C9085A948D556D9172365b059eFdee9ea4202ab').trim() as `0x${string}`;
 export const EXPLORER = 'https://explorer-studio.genlayer.com';
 const readClient = createClient({ chain: studionet });
 
