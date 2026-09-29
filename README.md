@@ -4,7 +4,7 @@
 
 ## Status
 
-Contract and frontend implemented. The app displays only finalized chain data. Set `VITE_CONTRACT_ADDRESS` to a verified Studionet deployment to activate writes and reads. No sample bounty is represented as onchain activity.
+Contract and frontend implemented. The revised contract is deployed on Studionet at [`0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE`](https://explorer-studio.genlayer.com/address/0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE). Its deployed code was compared byte for byte with `contracts/archive_relay.py`, and deployment transaction `0x73ad612c3df83656b8e0b1ad1fb3dc0844aa25a14c0932ff5296b548185e052c` finalized. Finalized `bounty_count()` was 0 at verification on 29 September 2026. The funded pilot and reward settlement remain unverified. The app shows finalized chain data only and does not present the public pilot HTML files as onchain bounty activity.
 
 ## Contract flow
 
@@ -31,19 +31,23 @@ genvm-lint contracts/archive_relay.py
 pytest tests -q
 ```
 
-The website uses `genlayer-js@2.0.0-rc.1`, the v2 API in current GenLayer documentation. It reads with `LATEST_FINAL`, estimates the fee for wallet-backed writes, waits for finalization, and checks the execution result. Wallet writes require an EIP-1193 provider connected to Studionet. The website does not ask for a private key. The Studio built-in account can deploy and exercise the contract inside Studio without connecting a browser wallet to the website.
+The website uses `genlayer-js@1.1.8` for stable Studionet, reads with `LATEST_FINAL`, waits for finalization on wallet-backed writes, and checks the execution result. Wallet writes require an EIP-1193 provider connected to Studionet. The website does not ask for a private key. The Studio built-in account can deploy and exercise the contract inside Studio without connecting a browser wallet to the website. The SDK 2.0 release candidate was incompatible with the stable Studio RPC when tested here.
 
 ## Deploy and verify in Studio
 
 1. Open [GenLayer Studio](https://studio.genlayer.com), select **Studionet** and a funded built-in account (faucet in the account selector).
-2. Load `contracts/archive_relay.py`, deploy with no constructor arguments, and wait for a successful finalized result. Save the contract address and deploy transaction link.
+2. The revision is already deployed at the address above. To deploy another instance, load `contracts/archive_relay.py` with no constructor arguments and wait for a successful finalized result.
 3. From the contract write panel, create a small funded bounty against a stable, public HTML page. Set the payable value separately from transaction fees. Confirm the source digest and reward through `get_bounty(0)` after finalization.
 4. Submit a genuine public archive URL; inspect its recorded outcome with `get_attempt(0)` and the final state. Try a changed/unavailable URL for inconclusive behavior. For payout and refund paths, use distinct bounties and inspect emitted transfer settlement.
-5. Set the contract address as `VITE_CONTRACT_ADDRESS` in `.env.local` for local testing and as a GitHub Actions repository variable for Pages. Rebuild or rerun the site workflow. Do not publish a purported live contract address before step 2 confirms it.
+5. The verified revision address is the app default. Set `VITE_CONTRACT_ADDRESS` to use a later verified instance and rebuild. Do not substitute the earlier `0x7e99e2D8CfFFDF3A38EB4E6F0247bEeF457f6a6C` instance: it predates the storage capture fix.
 
 ## Website
 
-The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It deliberately shows an empty real board before deployment. GitHub Pages workflow publishes on `main` when Pages is configured to use **GitHub Actions**; the repository variable `VITE_CONTRACT_ADDRESS` injects the verified contract address at build time.
+The responsive React app has a preservation board, funded bounty form, archive submission panel, outcome history, source and archive links, wallet connection, and transaction finalization status. It shows the real empty board until a bounty finalizes. The GitHub Pages workflow publishes on `main` when Pages is configured to use **GitHub Actions**; the repository variable `VITE_CONTRACT_ADDRESS` may override the verified default at build time.
+
+### Public pilot evidence
+
+`evidence/pilot-source.html` and `evidence/pilot-capture.html` are synthetic, project-controlled HTML fixtures with the same passage and attribution in different layouts. They support a transparent live test if validators can fetch raw GitHub content. They are not independent preservation by a third-party archive and no payout is claimed for them. A Studio simulation of creation did not yield a confirmed result; the live payable action was blocked by automatic approval review.
 
 ## Reference documentation
 
