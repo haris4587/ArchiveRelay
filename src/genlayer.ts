@@ -1,8 +1,8 @@
-import { createClient, isSuccessful } from 'genlayer-js';
+import { createClient } from 'genlayer-js';
 import { studionet } from 'genlayer-js/chains';
-import { TransactionHashVariant } from 'genlayer-js/types';
+import { ExecutionResult, TransactionHashVariant, TransactionStatus } from 'genlayer-js/types';
 
-export const CONTRACT = (import.meta.env.VITE_CONTRACT_ADDRESS || '').trim() as `0x${string}`;
+export const CONTRACT = (import.meta.env.VITE_CONTRACT_ADDRESS || '0x1E33Fd854F0Ed54A8CDAf52E1bEEadE7Fa39f9fE').trim() as `0x${string}`;
 export const EXPLORER = 'https://explorer-studio.genlayer.com';
 const readClient = createClient({ chain: studionet });
 
@@ -56,12 +56,11 @@ export async function write(account: string, functionName: string, args: (string
   if (!/^0x[a-fA-F0-9]{40}$/.test(CONTRACT)) throw new Error('Contract deployment is not configured yet');
   const client = createClient({ chain: studionet, account: account as `0x${string}`, provider: window.ethereum });
   await client.connect('studionet');
-  const call = { address: CONTRACT, functionName, args, ...(value === undefined ? {} : { value }) };
-  const estimate = await client.estimateTransactionFeesForWrite(call);
-  const hash = await client.writeContract({ ...call, fees: { distribution: estimate.distribution, feeValue: estimate.feeValue } });
+  const hash = await client.writeContract({ address: CONTRACT, functionName, args, value: value ?? 0n });
   onHash?.(hash);
-  const transaction = await client.waitForFinalization({ hash });
-  if (!isSuccessful(transaction)) throw new Error(`Transaction ${hash} failed: ${transaction.statusName} / ${transaction.txExecutionResultName}`);
+  const transaction = await client.waitForTransactionReceipt({ hash, status: TransactionStatus.FINALIZED });
+  if (transaction.txExecutionResultName !== ExecutionResult.FINISHED_WITH_RETURN)
+    throw new Error(`Transaction ${hash} failed: ${transaction.statusName} / ${transaction.txExecutionResultName}`);
   return hash;
 }
 export function toWei(gen: string): bigint {
